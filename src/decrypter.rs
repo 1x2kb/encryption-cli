@@ -1,5 +1,5 @@
 pub mod rsa {
-    use std::path::{PathBuf, Path};
+    use std::path::Path;
 
     use crate::key::rsa::get_private_key;
     use rsa::PaddingScheme;
@@ -14,7 +14,10 @@ pub mod rsa {
             .expect("Failed to decrypt file")
     }
 
-    pub fn decrypt_data_file(file_path: impl AsRef<Path>, private_key_path: impl AsRef<Path>) -> Vec<u8> {
+    pub fn decrypt_data_file(
+        file_path: impl AsRef<Path>,
+        private_key_path: impl AsRef<Path>,
+    ) -> Vec<u8> {
         decrypt_data(read_file_bytes(file_path), private_key_path)
     }
 }

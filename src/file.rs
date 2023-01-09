@@ -1,4 +1,4 @@
-use std::{fs, path::{Path}};
+use std::{fs, path::Path};
 
 pub fn read_file_string(path: impl AsRef<Path>) -> String {
     fs::read_to_string(path).expect("Failed to read in the private key. Terminating execution")

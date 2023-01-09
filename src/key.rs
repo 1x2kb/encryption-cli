@@ -1,6 +1,6 @@
 pub mod rsa {
 
-    use std::path::{Path};
+    use std::path::Path;
 
     use rsa::{
         pkcs8::{DecodePrivateKey, DecodePublicKey},
