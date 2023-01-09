@@ -1,5 +1,7 @@
 pub mod rsa {
 
+    use std::path::{Path};
+
     use rsa::{
         pkcs8::{DecodePrivateKey, DecodePublicKey},
         RsaPrivateKey, RsaPublicKey,
@@ -7,12 +9,12 @@ pub mod rsa {
 
     use crate::file::read_file_string;
 
-    pub fn get_private_key(path: &str) -> RsaPrivateKey {
+    pub fn get_private_key(path: impl AsRef<Path>) -> RsaPrivateKey {
         RsaPrivateKey::from_pkcs8_pem(&read_file_string(path))
             .expect("Failed to create private key from key file")
     }
 
-    pub fn get_public_key(path: &str) -> RsaPublicKey {
+    pub fn get_public_key(path: impl AsRef<Path>) -> RsaPublicKey {
         RsaPublicKey::from_public_key_pem(&read_file_string(path))
             .expect("Failed to create public key from key file")
     }

@@ -4,11 +4,11 @@ mod file;
 mod key;
 
 use std::ffi::OsString;
+use std::fs;
 use std::path::Path;
 use std::{env::current_dir, path::PathBuf};
 
 use crate::encrypter::rsa::encrypt_data_file;
-use crate::file::canonicalize;
 use crate::key::rsa::generate_key_pairs;
 use clap::{Parser, Subcommand};
 
@@ -75,15 +75,10 @@ fn generate_keys(output_dir: &Option<String>, bits: &usize) {
 
 fn encrypt_file(data_path: String, key_path: String) {
     let data_path = PathBuf::from(data_path.as_str());
-    let data_path_buff = canonicalize(&data_path).expect("Failed to canonicalize data path");
-    let data_path = data_path_buff.to_str().unwrap().to_string();
+    let data_path = fs::canonicalize(&data_path).expect("Failed to canonicalize data path");
 
     let key_path = PathBuf::from(key_path.as_str());
-    let key_path = canonicalize(&key_path)
-        .unwrap()
-        .to_str()
-        .unwrap()
-        .to_string();
+    let key_path = fs::canonicalize(&key_path).expect("Failed to canonicalize key path");
 
     let mut data_file_name = Path::new(&data_path).file_stem().unwrap().to_os_string();
     data_file_name.push(OsString::from(".encrypted"));
@@ -93,7 +88,7 @@ fn encrypt_file(data_path: String, key_path: String) {
 
     println!("{}", write_path.to_str().unwrap().to_string());
 
-    let data = encrypt_data_file(data_path.as_str(), key_path.as_str());
+    let data = encrypt_data_file(&data_path,&key_path);
 
     // file::write_file(data, format!("{}/{}", write_path, data_file_name).as_str()).unwrap();
 }
