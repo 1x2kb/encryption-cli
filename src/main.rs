@@ -92,7 +92,7 @@ fn generate_keys(output_dir: &Option<String>, bits: &usize) {
     println!("Wrote encryption key to path: {}", &encryption_path);
 }
 
-fn encrypt_file(data_path: String, key_path: String, output_path: Option<&String>) {
+fn encrypt_file(data_path: String, key_path: String, _output_path: &Option<String>) {
     let data_path = fs::canonicalize(data_path).expect("Failed to canonicalize data path");
     let key_path = fs::canonicalize(key_path).expect("Failed to canonicalize key path");
     let data_file_name = Path::new(&data_path).file_stem().unwrap();
