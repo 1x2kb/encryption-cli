@@ -3,10 +3,9 @@ mod encrypter;
 mod file;
 mod key;
 
-use std::ffi::OsString;
 use std::fs;
 use std::path::Path;
-use std::{env::current_dir, path::PathBuf};
+use std::{env::current_dir};
 
 use crate::decrypter::rsa::decrypt_data_file;
 use crate::encrypter::rsa::encrypt_data_file;
