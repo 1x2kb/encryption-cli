@@ -8,6 +8,7 @@ use std::fs;
 use std::path::Path;
 use std::{env::current_dir, path::PathBuf};
 
+use crate::decryptor::rsa::decrypt_file;
 use crate::encrypter::rsa::encrypt_data_file;
 use crate::key::rsa::generate_key_pairs;
 use clap::{Parser, Subcommand};
@@ -36,6 +37,11 @@ enum Commands {
         /// Path to the encryption key.
         key_path: String,
     },
+    DecryptRsa {
+        data_path: String,
+        key_path: String,
+        output_path: String,
+    },
 }
 
 fn main() {
@@ -49,6 +55,15 @@ fn main() {
             data_path,
             key_path,
         }) => encrypt_file(data_path.to_string(), key_path.to_string()),
+        Some(Commands::DecryptRsa {
+            data_path,
+            key_path,
+            output_path,
+        }) => decrypt_file(
+            data_path.to_string(),
+            key_path.to_string(),
+            output_path.to_string(),
+        ),
         None => panic!("No bit length specified"),
     }
 }
@@ -83,12 +98,29 @@ fn encrypt_file(data_path: String, key_path: String) {
     let mut data_file_name = Path::new(&data_path).file_stem().unwrap().to_os_string();
     data_file_name.push(OsString::from(".encrypted"));
 
-    let mut write_path = current_dir().expect("Could not generate a current directory");
     write_path.push(data_file_name);
 
     println!("{}", write_path.to_str().unwrap());
 
     let _data = encrypt_data_file(&data_path, &key_path);
 
-    // file::write_file(data, format!("{}/{}", write_path, data_file_name).as_str()).unwrap();
+    file::write_file(data, format!("{}/{}", write_path, data_file_name).as_str()).unwrap();
+}
+
+fn decrypt_file(data_path: String, key_path: String, output_path: String) {
+    let key_path = PathBuff::from(key_path.as_str());
+    let key_path = fs::canonicalize(data_path).expect("Failed to canonicalize key path");
+
+    let data_path = PathBuff::new(key_path.as_str());
+    let data_path = fs::canconicalize(data_path).expect("Failed to canonicalize data path");
+
+    let output_path = fs::canonicalize(output_path).expect("Failed to canonicalize output path");
+
+    let mut data_file_name = Path::new(&output_path.as_str())
+        .file_stem()
+        .unwrap()
+        .to_os_string();
+
+    println!("{}", output_path.to_str().unwrap());
+    decrypt_data_file(data_path, key_path);
 }
