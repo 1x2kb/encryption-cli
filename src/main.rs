@@ -123,5 +123,5 @@ fn decrypt_file(data_path: String, key_path: String, output_path: String) {
 
     let data = decrypt_data_file(data_path, key_path).expect("Failed to decrypt given data file");
 
-    write_file(data, output_path).unwrap();
+    write_file(data, output_path).expect("Failed to write the decrypted file");
 }
