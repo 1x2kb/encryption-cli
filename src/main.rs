@@ -8,8 +8,9 @@ use std::fs;
 use std::path::Path;
 use std::{env::current_dir, path::PathBuf};
 
-use crate::decryptor::rsa::decrypt_file;
+use crate::decrypter::rsa::decrypt_data_file;
 use crate::encrypter::rsa::encrypt_data_file;
+use crate::file::write_file;
 use crate::key::rsa::generate_key_pairs;
 use clap::{Parser, Subcommand};
 
@@ -36,6 +37,7 @@ enum Commands {
         data_path: String,
         /// Path to the encryption key.
         key_path: String,
+        output_path: Option<String>,
     },
     DecryptRsa {
         data_path: String,
@@ -54,7 +56,8 @@ fn main() {
         Some(Commands::EncryptRsa {
             data_path,
             key_path,
-        }) => encrypt_file(data_path.to_string(), key_path.to_string()),
+            output_path,
+        }) => encrypt_file(data_path.to_string(), key_path.to_string(), output_path),
         Some(Commands::DecryptRsa {
             data_path,
             key_path,
@@ -64,7 +67,7 @@ fn main() {
             key_path.to_string(),
             output_path.to_string(),
         ),
-        None => panic!("No bit length specified"),
+        None => panic!("No command matched"),
     }
 }
 
@@ -77,6 +80,7 @@ fn generate_keys(output_dir: &Option<String>, bits: &usize) {
     let decryption_path = format!("{}/{}", directory, "decryption-key.pem");
     let encryption_path = format!("{}/{}", directory, "encryption-key.pem");
 
+    // TODO: Make OS agnostic.
     private_key
         .write_pkcs8_pem_file(&decryption_path, rsa::pkcs8::LineEnding::LF)
         .unwrap();
@@ -88,39 +92,36 @@ fn generate_keys(output_dir: &Option<String>, bits: &usize) {
     println!("Wrote encryption key to path: {}", &encryption_path);
 }
 
-fn encrypt_file(data_path: String, key_path: String) {
-    let data_path = PathBuf::from(data_path.as_str());
+fn encrypt_file(data_path: String, key_path: String, output_path: Option<String>) {
     let data_path = fs::canonicalize(data_path).expect("Failed to canonicalize data path");
-
-    let key_path = PathBuf::from(key_path.as_str());
     let key_path = fs::canonicalize(key_path).expect("Failed to canonicalize key path");
+    let data_file_name = Path::new(&data_path).file_stem().unwrap();
 
-    let mut data_file_name = Path::new(&data_path).file_stem().unwrap().to_os_string();
-    data_file_name.push(OsString::from(".encrypted"));
-
-    write_path.push(data_file_name);
+    let mut write_path = current_dir().unwrap();
+    // If file name is Some for the current directory, the current directory is the file name.
+    if let Some(file_name) = write_path.file_name() {
+        write_path.push(file_name.to_os_string());
+    }
+    write_path.set_file_name(data_file_name);
+    write_path.set_extension("encrypted");
 
     println!("{}", write_path.to_str().unwrap());
 
-    let _data = encrypt_data_file(&data_path, &key_path);
+    let data = encrypt_data_file(&data_path, &key_path);
 
-    file::write_file(data, format!("{}/{}", write_path, data_file_name).as_str()).unwrap();
+    file::write_file(data, write_path).expect("Failed to write encrypted file");
 }
 
 fn decrypt_file(data_path: String, key_path: String, output_path: String) {
-    let key_path = PathBuff::from(key_path.as_str());
-    let key_path = fs::canonicalize(data_path).expect("Failed to canonicalize key path");
+    let data_path = fs::canonicalize(data_path).expect("Failed to canonicalize data path");
+    let key_path = fs::canonicalize(key_path).expect("Failed to canonicalize key path");
 
-    let data_path = PathBuff::new(key_path.as_str());
-    let data_path = fs::canconicalize(data_path).expect("Failed to canonicalize data path");
-
-    let output_path = fs::canonicalize(output_path).expect("Failed to canonicalize output path");
-
-    let mut data_file_name = Path::new(&output_path.as_str())
-        .file_stem()
-        .unwrap()
-        .to_os_string();
+    let output_path = Path::new(output_path.as_str());
+    let output_path = file::normalize_path(output_path);
 
     println!("{}", output_path.to_str().unwrap());
-    decrypt_data_file(data_path, key_path);
+
+    let data = decrypt_data_file(data_path, key_path).expect("Failed to decrypt given data file");
+
+    write_file(data, output_path).unwrap();
 }
