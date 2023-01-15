@@ -3,8 +3,9 @@ mod encrypter;
 mod file;
 mod key;
 
+use std::ffi::OsString;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::{env::current_dir};
 
 use crate::decrypter::rsa::decrypt_data_file;
@@ -33,10 +34,10 @@ enum Commands {
     /// Encrypts a file using the RSA algorithm using the user specified key.
     EncryptRsa {
         /// Path to the file to encrypt.
-        data_path: String,
+        data_path: OsString,
         /// Path to the encryption key.
-        key_path: String,
-        output_path: Option<String>,
+        key_path: OsString,
+        output_path: Option<OsString>,
     },
     DecryptRsa {
         data_path: String,
@@ -56,7 +57,7 @@ fn main() {
             data_path,
             key_path,
             output_path,
-        }) => encrypt_file(data_path.to_string(), key_path.to_string(), output_path),
+        }) => encrypt_file(data_path, key_path, output_path),
         Some(Commands::DecryptRsa {
             data_path,
             key_path,
@@ -91,18 +92,18 @@ fn generate_keys(output_dir: &Option<String>, bits: &usize) {
     println!("Wrote encryption key to path: {}", &encryption_path);
 }
 
-fn encrypt_file(data_path: String, key_path: String, _output_path: &Option<String>) {
+fn encrypt_file(data_path: &OsString, key_path: &OsString, output_path: &Option<OsString>) {
     let data_path = fs::canonicalize(data_path).expect("Failed to canonicalize data path");
     let key_path = fs::canonicalize(key_path).expect("Failed to canonicalize key path");
-    let data_file_name = Path::new(&data_path).file_stem().unwrap();
-
-    let mut write_path = current_dir().unwrap();
-    // If file name is Some for the current directory, the current directory is the file name.
-    if let Some(file_name) = write_path.file_name() {
-        write_path.push(file_name.to_os_string());
-    }
-    write_path.set_file_name(data_file_name);
-    write_path.set_extension("encrypted");
+    let data_file_name = Path::new(&data_path).file_stem().unwrap().to_os_string();
+    
+    let mut current_director = set_default_encryption_path();
+    current_director.set_file_name(data_file_name.as_os_str());
+    current_director.set_extension("encrypted");
+    let current_director = current_director.as_os_str().to_os_string();
+    
+    let write_path = output_path.as_ref().unwrap_or(&current_director);
+    let write_path = file::normalize_path(Path::new(&write_path));
 
     println!("{}", write_path.to_str().unwrap());
 
@@ -123,4 +124,17 @@ fn decrypt_file(data_path: String, key_path: String, output_path: String) {
     let data = decrypt_data_file(data_path, key_path).expect("Failed to decrypt given data file");
 
     write_file(data, output_path).expect("Failed to write the decrypted file");
+}
+
+fn set_default_encryption_path_str() -> OsString {
+    set_default_encryption_path().as_os_str().to_os_string()
+}
+
+fn set_default_encryption_path() -> PathBuf {
+    let mut output_path = current_dir().unwrap();
+    if let Some(file_name) = output_path.file_name() {
+        output_path.push(file_name.to_os_string());
+    }
+
+    output_path
 }
