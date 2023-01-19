@@ -8,5 +8,7 @@ author = "1x2kb"
 
 [dependencies]
 clap = { version = "4.0.32", features = ["derive"] }
+log = "0.4.17"
+pretty_env_logger = "0.4.0"
 rand = "0.8.5"
 rsa = "0.7.2"

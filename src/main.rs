@@ -3,21 +3,29 @@ mod encrypter;
 mod file;
 mod key;
 
+extern crate pretty_env_logger;
+#[macro_use]
+extern crate log;
+
+use std::env::current_dir;
 use std::ffi::OsString;
-use std::fs;
 use std::path::{Path, PathBuf};
-use std::{env::current_dir};
+use std::str::FromStr;
+use std::{env, fs};
 
 use crate::decrypter::rsa::decrypt_data_file;
 use crate::encrypter::rsa::encrypt_data_file;
 use crate::file::write_file;
 use crate::key::rsa::generate_key_pairs;
 use clap::{Parser, Subcommand};
+use log::{debug, error, info, warn};
 
 use rsa::pkcs8::{EncodePrivateKey, EncodePublicKey};
 
 #[derive(Parser)]
 struct Cli {
+    #[arg(short, long, help = "test")]
+    rust_level: Option<String>,
     #[command(subcommand)]
     command: Option<Commands>,
 }
@@ -48,6 +56,7 @@ enum Commands {
 
 fn main() {
     let cli = Cli::parse();
+    pretty_env_logger::init();
 
     match &cli.command {
         Some(Commands::GenerateKeys { output_dir, bits }) => {
@@ -67,7 +76,7 @@ fn main() {
             key_path.to_string(),
             output_path.to_string(),
         ),
-        None => panic!("No command matched"),
+        None => warn!("No command matched"),
     }
 }
 
@@ -84,28 +93,35 @@ fn generate_keys(output_dir: &Option<String>, bits: &usize) {
     private_key
         .write_pkcs8_pem_file(&decryption_path, rsa::pkcs8::LineEnding::LF)
         .unwrap();
-    println!("Wrote decryption key to path: {}", decryption_path);
+    info!("Wrote decryption key to path: {}", &decryption_path);
 
     public_key
         .write_public_key_pem_file(&encryption_path, rsa::pkcs8::LineEnding::LF)
         .unwrap();
-    println!("Wrote encryption key to path: {}", &encryption_path);
+    
+    info!("Wrote encryption key to path: {}", &encryption_path);
 }
 
 fn encrypt_file(data_path: &OsString, key_path: &OsString, output_path: &Option<OsString>) {
+    debug!("Canonicalizing data path");
     let data_path = fs::canonicalize(data_path).expect("Failed to canonicalize data path");
+    info!("Finalized data path: {}", &data_path.to_str().unwrap_or(""));
+
+    debug!("Canonicalizing key path");
     let key_path = fs::canonicalize(key_path).expect("Failed to canonicalize key path");
+    info!("Finalized key path: {}", data_path.to_str().unwrap_or(""));
+
     let data_file_name = Path::new(&data_path).file_stem().unwrap().to_os_string();
-    
+
     let mut current_director = set_default_encryption_path();
     current_director.set_file_name(data_file_name.as_os_str());
     current_director.set_extension("encrypted");
     let current_director = current_director.as_os_str().to_os_string();
-    
+
+    debug!("Creating output directory");
     let write_path = output_path.as_ref().unwrap_or(&current_director);
     let write_path = file::normalize_path(Path::new(&write_path));
-
-    println!("{}", write_path.to_str().unwrap());
+    info!("Finalized encrypted file path {}", write_path.to_str().unwrap_or(""));
 
     let data = encrypt_data_file(&data_path, &key_path);
 
@@ -113,21 +129,23 @@ fn encrypt_file(data_path: &OsString, key_path: &OsString, output_path: &Option<
 }
 
 fn decrypt_file(data_path: String, key_path: String, output_path: String) {
+    info!("Decrypting file");
+
+    debug!("Canonicalizing data path");
     let data_path = fs::canonicalize(data_path).expect("Failed to canonicalize data path");
+
+    debug!("Canonicalizing data path");
     let key_path = fs::canonicalize(key_path).expect("Failed to canonicalize key path");
 
+    info!("Successfully canonicalized data path and key path");
+
+    debug!("Parsing output path");
     let output_path = Path::new(output_path.as_str());
     let output_path = file::normalize_path(output_path);
-
-    println!("{}", output_path.to_str().unwrap());
 
     let data = decrypt_data_file(data_path, key_path).expect("Failed to decrypt given data file");
 
     write_file(data, output_path).expect("Failed to write the decrypted file");
-}
-
-fn set_default_encryption_path_str() -> OsString {
-    set_default_encryption_path().as_os_str().to_os_string()
 }
 
 fn set_default_encryption_path() -> PathBuf {
