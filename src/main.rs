@@ -4,21 +4,21 @@ mod file;
 mod key;
 
 extern crate pretty_env_logger;
-#[macro_use]
+
 extern crate log;
 
 use std::env::current_dir;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
-use std::str::FromStr;
-use std::{env, fs};
+
+use std::fs;
 
 use crate::decrypter::rsa::decrypt_data_file;
 use crate::encrypter::rsa::encrypt_data_file;
 use crate::file::write_file;
 use crate::key::rsa::generate_key_pairs;
 use clap::{Parser, Subcommand};
-use log::{debug, error, info, warn};
+use log::{debug, info, warn};
 
 use rsa::pkcs8::{EncodePrivateKey, EncodePublicKey};
 
@@ -98,7 +98,7 @@ fn generate_keys(output_dir: &Option<String>, bits: &usize) {
     public_key
         .write_public_key_pem_file(&encryption_path, rsa::pkcs8::LineEnding::LF)
         .unwrap();
-    
+
     info!("Wrote encryption key to path: {}", &encryption_path);
 }
 
@@ -121,7 +121,10 @@ fn encrypt_file(data_path: &OsString, key_path: &OsString, output_path: &Option<
     debug!("Creating output directory");
     let write_path = output_path.as_ref().unwrap_or(&current_director);
     let write_path = file::normalize_path(Path::new(&write_path));
-    info!("Finalized encrypted file path {}", write_path.to_str().unwrap_or(""));
+    info!(
+        "Finalized encrypted file path {}",
+        write_path.to_str().unwrap_or("")
+    );
 
     let data = encrypt_data_file(&data_path, &key_path);
 
@@ -151,7 +154,7 @@ fn decrypt_file(data_path: String, key_path: String, output_path: String) {
 fn set_default_encryption_path() -> PathBuf {
     let mut output_path = current_dir().unwrap();
     if let Some(file_name) = output_path.file_name() {
-        output_path.push(file_name.to_os_string());
+        output_path.push(std::ffi::OsStr::to_os_string(file_name));
     }
 
     output_path
