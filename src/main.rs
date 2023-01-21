@@ -10,15 +10,15 @@ extern crate log;
 use std::env::current_dir;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
-use std::str::FromStr;
-use std::{env, fs};
+
+use std::{fs};
 
 use crate::decrypter::rsa::decrypt_data_file;
 use crate::encrypter::rsa::encrypt_data_file;
 use crate::file::write_file;
 use crate::key::rsa::generate_key_pairs;
 use clap::{Parser, Subcommand};
-use log::{debug, error, info, warn};
+use log::{debug, info, warn};
 
 use rsa::pkcs8::{EncodePrivateKey, EncodePublicKey};
 
