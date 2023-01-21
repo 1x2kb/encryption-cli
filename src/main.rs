@@ -98,7 +98,7 @@ fn generate_keys(output_dir: &Option<String>, bits: &usize) {
     public_key
         .write_public_key_pem_file(&encryption_path, rsa::pkcs8::LineEnding::LF)
         .unwrap();
-    
+
     info!("Wrote encryption key to path: {}", &encryption_path);
 }
 
@@ -121,7 +121,10 @@ fn encrypt_file(data_path: &OsString, key_path: &OsString, output_path: &Option<
     debug!("Creating output directory");
     let write_path = output_path.as_ref().unwrap_or(&current_director);
     let write_path = file::normalize_path(Path::new(&write_path));
-    info!("Finalized encrypted file path {}", write_path.to_str().unwrap_or(""));
+    info!(
+        "Finalized encrypted file path {}",
+        write_path.to_str().unwrap_or("")
+    );
 
     let data = encrypt_data_file(&data_path, &key_path);
 
