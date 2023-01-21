@@ -4,14 +4,14 @@ mod file;
 mod key;
 
 extern crate pretty_env_logger;
-#[macro_use]
+
 extern crate log;
 
 use std::env::current_dir;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 
-use std::{fs};
+use std::fs;
 
 use crate::decrypter::rsa::decrypt_data_file;
 use crate::encrypter::rsa::encrypt_data_file;
@@ -154,7 +154,7 @@ fn decrypt_file(data_path: String, key_path: String, output_path: String) {
 fn set_default_encryption_path() -> PathBuf {
     let mut output_path = current_dir().unwrap();
     if let Some(file_name) = output_path.file_name() {
-        output_path.push(file_name.to_os_string());
+        output_path.push(std::ffi::OsStr::to_os_string(file_name));
     }
 
     output_path
