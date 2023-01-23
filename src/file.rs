@@ -72,14 +72,20 @@ mod read_file {
 
 #[cfg(test)]
 mod write_file {
-    use std::ffi::OsString;
-
     use super::write_file;
 
     #[test]
+    #[ignore]
     fn writes_file() {
         let path = "test-files/test-write-file.txt";
 
         let data: Vec<u8> = "qwerty".as_bytes().into_iter().map(|v| *v).collect();
+        let expected = String::from_utf8(data.clone()).unwrap();
+        write_file(data, path).unwrap();
+
+        let file_contents = std::fs::read_to_string(path).unwrap();
+
+        assert_eq!(file_contents, expected);
+        std::fs::remove_file(path).unwrap();
     }
 }
