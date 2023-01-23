@@ -1,14 +1,15 @@
 use std::{
     fs,
+    io::Error,
     path::{Component, Path, PathBuf},
 };
 
-pub fn read_file_string(path: impl AsRef<Path>) -> String {
-    fs::read_to_string(path).expect("Failed to read in the private key. Terminating execution")
+pub fn read_file_string(path: impl AsRef<Path>) -> Result<String, Error> {
+    fs::read_to_string(path)
 }
 
-pub fn read_file_bytes(path: impl AsRef<Path>) -> Vec<u8> {
-    fs::read(path).expect("Failed to read data file")
+pub fn read_file_bytes(path: impl AsRef<Path>) -> Result<Vec<u8>, Error> {
+    fs::read(path)
 }
 
 pub fn write_file(data: Vec<u8>, path: impl AsRef<Path>) -> Result<(), std::io::Error> {
@@ -54,7 +55,7 @@ mod read_file {
         let path = "test-files/test-read-file.txt";
 
         let expected: Vec<u8> = "qwerty".as_bytes().into_iter().map(|v| *v).collect();
-        let bytes = read_file_bytes(OsString::from(path));
+        let bytes = read_file_bytes(OsString::from(path)).unwrap();
 
         assert_eq!(expected, bytes);
     }
@@ -64,7 +65,7 @@ mod read_file {
         let path = "test-files/test-read-file.txt";
 
         let expected = "qwerty";
-        let text = read_file_string(OsString::from(path));
+        let text = read_file_string(OsString::from(path)).unwrap();
 
         assert_eq!(text, expected);
     }

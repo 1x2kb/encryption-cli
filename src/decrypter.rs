@@ -19,6 +19,9 @@ pub mod rsa {
         file_path: impl AsRef<Path>,
         private_key_path: impl AsRef<Path>,
     ) -> Result<Vec<u8>, rsa::errors::Error> {
-        decrypt_data(read_file_bytes(file_path), private_key_path)
+        decrypt_data(
+            read_file_bytes(file_path).expect("Failed to read the data file"),
+            private_key_path,
+        )
     }
 }
