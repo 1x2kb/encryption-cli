@@ -16,7 +16,7 @@ pub mod rsa {
     }
 
     pub fn encrypt_data_file(file_path: &PathBuf, public_key_path: &PathBuf) -> Vec<u8> {
-        let data = read_file_bytes(file_path);
+        let data = read_file_bytes(file_path).expect("Failed to read data file");
 
         encrypt_data(data, public_key_path)
     }
