@@ -6,10 +6,13 @@ pub mod rsa {
 
     use crate::file::read_file_bytes;
 
-    pub fn decrypt_data(data: Vec<u8>, private_key: RsaPrivateKey) -> Result<Vec<u8>, rsa::errors::Error> {
+    pub fn decrypt_data(
+        data: Vec<u8>,
+        private_key: RsaPrivateKey,
+    ) -> Result<Vec<u8>, rsa::errors::Error> {
         private_key.decrypt(PaddingScheme::new_pkcs1v15_encrypt(), &data)
     }
-    
+
     pub fn decrypt_data_with_key_file(
         data: Vec<u8>,
         private_key_path: impl AsRef<Path>,
@@ -30,11 +33,10 @@ pub mod rsa {
 
 #[cfg(test)]
 mod rsa_test {
-    
+
     #[cfg(test)]
     mod decrypt {
-        use super::super::rsa::{decrypt_data_file};
-
+        use super::super::rsa::decrypt_data_file;
 
         #[test]
         fn decrypts_data_file() {
@@ -44,7 +46,10 @@ mod rsa_test {
 
             let decrypted_data = decrypt_data_file(data_path, key_path).unwrap();
 
-            assert_eq!(String::from_utf8(decrypted_data).unwrap(), expected_decrypted_data);
+            assert_eq!(
+                String::from_utf8(decrypted_data).unwrap(),
+                expected_decrypted_data
+            );
         }
     }
 }
