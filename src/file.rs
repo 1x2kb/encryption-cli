@@ -54,7 +54,7 @@ mod read_file {
     fn reads_file_to_bytes() {
         let path = "test-files/test-read-file.txt";
 
-        let expected: Vec<u8> = "qwerty".as_bytes().into_iter().map(|v| *v).collect();
+        let expected: Vec<u8> = "qwerty".as_bytes().to_vec();
         let bytes = read_file_bytes(OsString::from(path)).unwrap();
 
         assert_eq!(expected, bytes);
@@ -80,7 +80,7 @@ mod write_file {
     fn writes_file() {
         let path = "test-files/test-write-file.txt";
 
-        let data: Vec<u8> = "qwerty".as_bytes().into_iter().map(|v| *v).collect();
+        let data: Vec<u8> = "qwerty".as_bytes().to_vec();
         let expected = String::from_utf8(data.clone()).unwrap();
         write_file(data, path).unwrap();
 
