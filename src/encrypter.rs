@@ -1,5 +1,5 @@
 pub mod rsa {
-    use std::path::{PathBuf, Path};
+    use std::path::{Path};
 
     use rsa::{PaddingScheme, PublicKey, RsaPublicKey};
 
