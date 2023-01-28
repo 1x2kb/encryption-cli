@@ -126,7 +126,7 @@ fn encrypt_file(data_path: &OsString, key_path: &OsString, output_path: &Option<
         write_path.to_str().unwrap_or("")
     );
 
-    let data = encrypt_data_file(&data_path, &key_path);
+    let data = encrypt_data_file(data_path, key_path).expect("Failed to encrypt file");
 
     file::write_file(data, write_path).expect("Failed to write encrypted file");
 }
