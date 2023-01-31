@@ -8,11 +8,11 @@ use std::path::{Path, PathBuf};
 
 use std::fs;
 
+use clap::{Parser, Subcommand};
 use decrypter::rsa::decrypt_data_file;
 use encrypter::rsa::encrypt_data_file;
 use file::write_file;
 use keys::rsa::generate_key_pairs;
-use clap::{Parser, Subcommand};
 use log::{debug, info, warn};
 
 use rsa::pkcs8::{EncodePrivateKey, EncodePublicKey};
