@@ -1,8 +1,3 @@
-mod decrypter;
-mod encrypter;
-mod file;
-mod key;
-
 extern crate pretty_env_logger;
 
 extern crate log;
@@ -13,11 +8,11 @@ use std::path::{Path, PathBuf};
 
 use std::fs;
 
-use crate::decrypter::rsa::decrypt_data_file;
-use crate::encrypter::rsa::encrypt_data_file;
-use crate::file::write_file;
-use crate::key::rsa::generate_key_pairs;
 use clap::{Parser, Subcommand};
+use decrypter::rsa::decrypt_data_file;
+use encrypter::rsa::encrypt_data_file;
+use file::write_file;
+use keys::rsa::generate_key_pairs;
 use log::{debug, info, warn};
 
 use rsa::pkcs8::{EncodePrivateKey, EncodePublicKey};

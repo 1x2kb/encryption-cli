@@ -7,7 +7,7 @@ pub mod rsa {
         RsaPrivateKey, RsaPublicKey,
     };
 
-    use crate::file::read_file_string;
+    use file::read_file_string;
 
     pub fn get_private_key(path: impl AsRef<Path>) -> RsaPrivateKey {
         RsaPrivateKey::from_pkcs8_pem(&read_file_string(path).expect("Failed to read private key"))

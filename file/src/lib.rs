@@ -52,7 +52,7 @@ mod read_file {
 
     #[test]
     fn reads_file_to_bytes() {
-        let path = "test-files/test-read-file.txt";
+        let path = "../test-files/test-read-file.txt";
 
         let expected: Vec<u8> = "qwerty".as_bytes().to_vec();
         let bytes = read_file_bytes(OsString::from(path)).unwrap();
@@ -62,7 +62,7 @@ mod read_file {
 
     #[test]
     fn reads_file_to_string() {
-        let path = "test-files/test-read-file.txt";
+        let path = "../test-files/test-read-file.txt";
 
         let expected = "qwerty";
         let text = read_file_string(OsString::from(path)).unwrap();
@@ -78,9 +78,9 @@ mod write_file {
     #[test]
     #[ignore]
     fn writes_file() {
-        let path = "test-files/test-write-file.txt";
+        let path = "../test-files/test-write-file.txt";
 
-        let data: Vec<u8> = "qwerty".as_bytes().to_vec();
+        let data = "qwerty".as_bytes().to_vec();
         let expected = String::from_utf8(data.clone()).unwrap();
         write_file(data, path).unwrap();
 
